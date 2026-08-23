@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Privacy gating and Agent workflows</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Privacy gating and Agent workflows</h1>
+
+
+
+<div id="the-promise" class="section level2">
+<h2>The promise</h2>
+<p>DataGangeR’s spine is simple: you set the privacy rules once; then
+the AI only ever gets reviewed synthetic data or a reproducible recipe
+for generating it, and nothing leaves your machine.</p>
+<p>That supports two real workflows:</p>
+<ul>
+<li>Path A: you hand the AI the synthetic bundle.</li>
+<li>Path B: you save the config and let the AI call DataGangeR to
+reproduce or vary the synthetic data without ever reading the real
+data.</li>
+</ul>
+<p>Either way, the human makes the privacy decisions first.</p>
+</div>
+<div id="the-privacy-gating-ladder" class="section level2">
+<h2>The privacy gating ladder</h2>
+<p>The app’s privacy story is a ladder, not a single checkbox. Each step
+exists for a different reason.</p>
+<div id="entry-attestation-direct-identifiers" class="section level3">
+<h3>1. Entry attestation: direct identifiers</h3>
+<p>Before anything else, the app opens with a hard attestation about
+direct identifiers. This is the first gate because names, emails, phone
+numbers, institutional IDs, record numbers, and similar columns are the
+obvious category that should not enter the workflow.</p>
+<p>If <code>synthpop</code> is not installed, this modal also recommends
+it for correlation-aware synthesis; the internal engine remains
+available as the dependency-free fallback.</p>
+<p>Why it exists: it makes the user explicitly confirm the basic rule up
+front, and it gives that rule downstream consequences.</p>
+</div>
+<div id="upload" class="section level3">
+<h3>2. Upload</h3>
+<p>Once the user attests, they upload the file.</p>
+<p>The upload flow immediately sorts columns into
+<strong>Synthesise</strong>, <strong>Pass through</strong>, or
+<strong>Drop</strong>. Identifier-shaped columns are flagged as direct
+identifiers and pre-suggested for scrambling/de-identification; the user
+can choose Drop or another allowed action before continuing.</p>
+<p>Why it exists: the package has to read the data into memory to
+profile it and look for risks. The honest claim is not “we don’t read”.
+The honest claim is: we scan locally to flag direct identifiers and help
+remove or de-identify them; we never upload; we never keep.</p>
+</div>
+<div id="early-soft-fail-safe" class="section level3">
+<h3>3. Early soft fail-safe</h3>
+<p>After upload triage, DataGangeR scans any retained columns for values
+that still look like direct identifiers and surfaces suspected matches
+with reasons. The user can confirm and proceed, drop the flagged
+columns, or abort.</p>
+<p>Why it exists: the attestation is informed consent, but the detector
+is an assistive safety net. It is there to catch problems early, before
+objective selection or column-by-column decisions.</p>
+<p>This is intentionally a soft checkpoint, not a claim that the package
+can catch everything. It reduces direct disclosure risk; it is not a
+guarantee.</p>
+</div>
+<div id="objective" class="section level3">
+<h3>4. Objective</h3>
+<p>Next, the user picks the objective: demo, development, or
+analytics.</p>
+<p>Why it exists: the objective sets the default disclosure posture and
+fidelity trade-offs before synthesis. It tells the package what kind of
+sharing job the synthetic data needs to support.</p>
+</div>
+<div id="configure-two-questions-per-column" class="section level3">
+<h3>5. Configure: two questions per column</h3>
+<p>After the no-direct-identifiers attestation, Configure asks two
+questions for every eligible column. The lead-in focuses on the two
+remaining risks, while Q1 still offers a direct-identifier answer so the
+user can correct the attestation or an earlier detector:</p>
+<blockquote>
+<p>You’ve confirmed there are no direct identifiers. Two risks remain
+for each column:</p>
+<ul>
+<li>Q1: Could this column, combined with others, help single out a
+person?</li>
+<li>Q2: Is this column sensitive — would it be harmful if revealed?</li>
+</ul>
+</blockquote>
+<p>Why it exists: this is where the human defines the actual privacy
+rules, column by column, and the app hard-gates progress until every
+column is answered.</p>
+<p>Q1 maps to quasi-identifiers: whether a column contributes to
+singling someone out in combination with other columns. Q2 maps to
+sensitive attributes: whether the column would be harmful if revealed
+even if it is not identifying by itself.</p>
+</div>
+<div id="synthesis-enforcement" class="section level3">
+<h3>6. Synthesis enforcement</h3>
+<p>Once the roles are set, DataGangeR enforces them during synthesis:
+quasi-identifying columns (Q1 = combination) are coarsened and grouped
+with k-anonymity so no rare combination survives; sensitive columns that
+are not quasi-identifying are recreated from their distributions — exact
+values are not copied, but attribute-level protection is not yet
+applied; and a direct answer derives a Drop action. A deliberate
+per-column Scramble or Pass through override is preserved, with Pass
+through visibly warning that it copies real values.</p>
+<p>Why it exists: the answers are not just labels for documentation.
+They become executable rules that shape the synthetic output.</p>
+</div>
+<div id="compare-plus-privacy-report" class="section level3">
+<h3>7. Compare plus privacy report</h3>
+<p>After generation, the app splits fidelity checks into
+<strong>Univariate</strong> and <strong>Bivariate</strong> views,
+alongside a privacy report. Univariate checks compare each column’s
+distribution. Bivariate checks test whether a predictor-to-outcome
+relationship changes between original and synthetic data by fitting an
+X-by-synthetic interaction. Low interaction p-values indicate poorer
+fidelity; effect sizes are odds ratios for binary outcomes, slope ratios
+for counts, and differences in slope for continuous outcomes (with a
+joint test for multi-level categorical outcomes). The exported
+comparison report repeats these interaction tests for eligible unordered
+pairs in data-column order.</p>
+<p>Why it exists: the package should not ask the user to trust the
+synthetic output blindly. The compare step shows how closely both
+distributions and relationships track the original, and the privacy
+report shows the disclosure controls and warnings that matter for
+sharing.</p>
+</div>
+<div id="export" class="section level3">
+<h3>8. Export</h3>
+<p>Finally, the user reviews a plain-language disclosure-risk brief and
+exports a single bundle containing the synthetic data, human-readable
+report, and agent recipe.</p>
+<p>The brief reports the minimum group size, blanked rows, exact
+reproductions of real records, sensitive exact matches, and remaining
+privacy findings. A sensitive exact match blocks the first export
+attempt. After regeneration, a human can acknowledge a residual match;
+the decision is recorded in the manifest. The page puts the bundle
+contents first and does not repeat the Generation summary. When
+k-anonymity was infeasible, its acknowledgment uses the actual k, QI
+column names, and smallest group size to explain which guarantee is
+missing before the user can proceed.</p>
+<p>Why it exists: export is where the two AI workflows split. You can
+hand off reviewed synthetic artifacts directly, or use the recipe that
+lets an agent reproduce the same synthetic data later without touching
+the real data.</p>
+</div>
+</div>
+<div id="what-the-two-questions-reinforce" class="section level2">
+<h2>What the two questions reinforce</h2>
+<p>The two Configure questions matter because removing names is not the
+whole job.</p>
+<ul>
+<li>Q1 reinforces linkage risk: a column can be safe on its own but
+risky in combination with others.</li>
+<li>Q2 reinforces that harm is not the same thing as identification: a
+column can be non-identifying and still be sensitive.</li>
+</ul>
+<p>Mapped to the three disclosure-control categories, the ladder works
+like this:</p>
+<ul>
+<li>Entry attestation plus the early fail-safe: direct identifiers.</li>
+<li>Q1: quasi-identifiers.</li>
+<li>Q2: sensitive attributes.</li>
+</ul>
+<p>That is the point of the sequence. After the user confirms there are
+no direct identifiers, the app keeps the two subtler risks visible so
+the user does not falsely feel “done” after removing names.</p>
+</div>
+<div id="short-glossary" class="section level2">
+<h2>Short glossary</h2>
+<ul>
+<li><strong>Quasi-identifier (QI):</strong> a column that does not name
+a person on its own, but can identify someone when combined with others,
+like age + sex + education.</li>
+<li><strong>k-anonymity:</strong> a rule that requires every
+quasi-identifier combination to appear in at least <code>k</code>
+rows.</li>
+<li><strong>k:</strong> the minimum number of rows required for each
+quasi-identifier combination.</li>
+<li><strong>Cell:</strong> one group of rows that shares the same
+quasi-identifier combination.</li>
+<li><strong>Suppression:</strong> blanking the quasi-identifier values
+in rows that still fall below <code>k</code>.</li>
+</ul>
+</div>
+<div id="worked-k-anonymity-examples-from-the-built-in-samples" class="section level2">
+<h2>Worked k-anonymity examples from the built-in samples</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(dataganger)</span></code></pre></div>
+<pre><code>## dataganger 0.8.2
+##   Start the app: dataganger::run_app()</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co"># Everything below uses only exported DataGangeR functions, so you can run it</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># yourself. A &quot;roles&quot; frame just needs `variable` and `disclosure_role`</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co"># (&quot;quasi&quot; marks a quasi-identifier, &quot;direct&quot; maps to Drop unless an explicit</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co"># action override is supplied, and &quot;none&quot; is left alone).</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>qi_roles <span class="ot">&lt;-</span> <span class="cf">function</span>(data, qi_cols, <span class="at">drop_cols =</span> <span class="st">&quot;id&quot;</span>) {</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>    <span class="at">variable =</span> <span class="fu">names</span>(data),</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>    <span class="at">disclosure_role =</span> <span class="fu">ifelse</span>(</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>      <span class="fu">names</span>(data) <span class="sc">%in%</span> qi_cols, <span class="st">&quot;quasi&quot;</span>,</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>      <span class="fu">ifelse</span>(<span class="fu">names</span>(data) <span class="sc">%in%</span> drop_cols, <span class="st">&quot;direct&quot;</span>, <span class="st">&quot;none&quot;</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>    ),</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>    <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>  )</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>}</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co"># Probe one configuration: returns the kanon outcome (infeasible? how many</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co"># quasi-identifier cells had to be suppressed?) without printing warnings.</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>probe_kanon <span class="ot">&lt;-</span> <span class="cf">function</span>(data, qi_cols, k) {</span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>  out <span class="ot">&lt;-</span> <span class="fu">withCallingHandlers</span>(</span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>    <span class="fu">enforce_kanon</span>(data, <span class="fu">qi_roles</span>(data, qi_cols), <span class="at">k =</span> k),</span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>    <span class="at">warning =</span> <span class="cf">function</span>(w) <span class="fu">invokeRestart</span>(<span class="st">&quot;muffleWarning&quot;</span>)</span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>  )</span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a>  <span class="fu">attr</span>(out, <span class="st">&quot;kanon&quot;</span>, <span class="at">exact =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a>}</span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a>individual_qi <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;age&quot;</span>, <span class="st">&quot;sex&quot;</span>, <span class="st">&quot;education&quot;</span>, <span class="st">&quot;smoker&quot;</span>)</span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="co"># Escape route 1: walk k down from 5 to the largest value that works</span></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a><span class="co"># (never below 3 - smaller values give close to no protection).</span></span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a>feasible_k <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a><span class="cf">for</span> (k_try <span class="cf">in</span> <span class="dv">5</span><span class="sc">:</span><span class="dv">3</span>) {</span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a>  info <span class="ot">&lt;-</span> <span class="fu">probe_kanon</span>(individual_sample, individual_qi, k_try)</span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">isTRUE</span>(info<span class="sc">$</span>infeasible)) {</span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a>    feasible_k <span class="ot">&lt;-</span> k_try</span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a>    feasible_k_info <span class="ot">&lt;-</span> info</span>
+<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a>    <span class="cf">break</span></span>
+<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a>  }</span>
+<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a>}</span>
+<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a></span>
+<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a><span class="co"># Escape route 2: generate more synthetic rows, so each quasi-identifier</span></span>
+<span id="cb3-43"><a href="#cb3-43" tabindex="-1"></a><span class="co"># combination is shared by more rows. The engine is pinned so the numbers</span></span>
+<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a><span class="co"># do not depend on which synthesis packages are installed.</span></span>
+<span id="cb3-45"><a href="#cb3-45" tabindex="-1"></a>more_rows_spec <span class="ot">&lt;-</span> <span class="fu">synth_spec</span>(</span>
+<span id="cb3-46"><a href="#cb3-46" tabindex="-1"></a>  <span class="at">purpose =</span> <span class="st">&quot;development&quot;</span>, <span class="at">n =</span> <span class="dv">1000</span>, <span class="at">seed =</span> <span class="dv">1</span>, <span class="at">engine =</span> <span class="st">&quot;internal&quot;</span></span>
+<span id="cb3-47"><a href="#cb3-47" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## ℹ Development synthesis uses synthpop for correlation-aware output when
+##   installed; review privacy warnings before sharing.</code></pre>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>more_rows <span class="ot">&lt;-</span> <span class="fu">withCallingHandlers</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="fu">synthesize_data</span>(individual_sample, more_rows_spec,</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>                  <span class="at">roles =</span> <span class="fu">qi_roles</span>(individual_sample, individual_qi)),</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="at">warning =</span> <span class="cf">function</span>(w) <span class="fu">invokeRestart</span>(<span class="st">&quot;muffleWarning&quot;</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>more_rows_info <span class="ot">&lt;-</span> <span class="fu">attr</span>(more_rows, <span class="st">&quot;kanon&quot;</span>, <span class="at">exact =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co"># Escape route 3: shrink the quasi-identifier set (age drives the sparsity:</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co"># it has the most distinct values of the four).</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>drop_age_info <span class="ot">&lt;-</span> <span class="fu">probe_kanon</span>(</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>  individual_sample, <span class="fu">c</span>(<span class="st">&quot;sex&quot;</span>, <span class="st">&quot;education&quot;</span>, <span class="st">&quot;smoker&quot;</span>), <span class="dv">5</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>)</span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>suppressed_text <span class="ot">&lt;-</span> <span class="cf">function</span>(info) {</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>  n <span class="ot">&lt;-</span> info<span class="sc">$</span>suppressed_cells</span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;%d suppressed QI cells&quot;</span>, <span class="cf">if</span> (<span class="fu">is.null</span>(n)) <span class="dv">0</span><span class="dt">L</span> <span class="cf">else</span> n)</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>}</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>individual_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>  <span class="at">option =</span> <span class="fu">c</span>(</span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>    <span class="st">&quot;Keep age + sex + education + smoker at k = 5&quot;</span>,</span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>    <span class="fu">sprintf</span>(<span class="st">&quot;Apply k = %d&quot;</span>, feasible_k),</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>    <span class="st">&quot;Generate 1000 rows at k = 5&quot;</span>,</span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>    <span class="st">&quot;Mark age as not part of the QI set&quot;</span></span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a>  ),</span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a>  <span class="at">feasible_at_k =</span> <span class="fu">c</span>(</span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a>    <span class="st">&quot;No&quot;</span>,</span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a>    <span class="fu">sprintf</span>(<span class="st">&quot;Yes (k = %d)&quot;</span>, feasible_k),</span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">isTRUE</span>(more_rows_info<span class="sc">$</span>infeasible)) <span class="st">&quot;No&quot;</span> <span class="cf">else</span> <span class="st">&quot;Yes (k = 5)&quot;</span>,</span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">isTRUE</span>(drop_age_info<span class="sc">$</span>infeasible)) <span class="st">&quot;No&quot;</span> <span class="cf">else</span> <span class="st">&quot;Yes (k = 5)&quot;</span></span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a>  ),</span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a>  <span class="at">cost =</span> <span class="fu">c</span>(</span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a>    <span class="st">&quot;No k-anonymity protection applied&quot;</span>,</span>
+<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a>    <span class="fu">suppressed_text</span>(feasible_k_info),</span>
+<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a>    <span class="fu">suppressed_text</span>(more_rows_info),</span>
+<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a>    <span class="fu">suppressed_text</span>(drop_age_info)</span>
+<span id="cb5-37"><a href="#cb5-37" tabindex="-1"></a>  ),</span>
+<span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a>  <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
+<span id="cb5-39"><a href="#cb5-39" tabindex="-1"></a>)</span>
+<span id="cb5-40"><a href="#cb5-40" tabindex="-1"></a></span>
+<span id="cb5-41"><a href="#cb5-41" tabindex="-1"></a><span class="co"># The temporal and geographic samples are aggregate-shaped (site-day records</span></span>
+<span id="cb5-42"><a href="#cb5-42" tabindex="-1"></a><span class="co"># and region summaries, not people), so no column is marked as identifying</span></span>
+<span id="cb5-43"><a href="#cb5-43" tabindex="-1"></a><span class="co"># in combination and the k-anonymity step never engages.</span></span>
+<span id="cb5-44"><a href="#cb5-44" tabindex="-1"></a>temporal_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb5-45"><a href="#cb5-45" tabindex="-1"></a>  <span class="at">option =</span> <span class="st">&quot;Keep the combination question at none for all columns&quot;</span>,</span>
+<span id="cb5-46"><a href="#cb5-46" tabindex="-1"></a>  <span class="at">feasible_at_k =</span> <span class="st">&quot;Not applicable&quot;</span>,</span>
+<span id="cb5-47"><a href="#cb5-47" tabindex="-1"></a>  <span class="at">cost =</span> <span class="fu">sprintf</span>(</span>
+<span id="cb5-48"><a href="#cb5-48" tabindex="-1"></a>    <span class="st">&quot;No k-anonymity step; %d QI columns selected because rows are site-day records, not people&quot;</span>,</span>
+<span id="cb5-49"><a href="#cb5-49" tabindex="-1"></a>    <span class="fu">sum</span>(<span class="fu">qi_roles</span>(temporal_sample, <span class="fu">character</span>(<span class="dv">0</span>))<span class="sc">$</span>disclosure_role <span class="sc">==</span> <span class="st">&quot;quasi&quot;</span>)</span>
+<span id="cb5-50"><a href="#cb5-50" tabindex="-1"></a>  ),</span>
+<span id="cb5-51"><a href="#cb5-51" tabindex="-1"></a>  <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
+<span id="cb5-52"><a href="#cb5-52" tabindex="-1"></a>)</span>
+<span id="cb5-53"><a href="#cb5-53" tabindex="-1"></a></span>
+<span id="cb5-54"><a href="#cb5-54" tabindex="-1"></a>geographic_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb5-55"><a href="#cb5-55" tabindex="-1"></a>  <span class="at">option =</span> <span class="st">&quot;Keep the combination question at none for all columns&quot;</span>,</span>
+<span id="cb5-56"><a href="#cb5-56" tabindex="-1"></a>  <span class="at">feasible_at_k =</span> <span class="st">&quot;Not applicable&quot;</span>,</span>
+<span id="cb5-57"><a href="#cb5-57" tabindex="-1"></a>  <span class="at">cost =</span> <span class="fu">sprintf</span>(</span>
+<span id="cb5-58"><a href="#cb5-58" tabindex="-1"></a>    <span class="st">&quot;No k-anonymity step; %d QI columns selected because rows are region summaries, not people&quot;</span>,</span>
+<span id="cb5-59"><a href="#cb5-59" tabindex="-1"></a>    <span class="fu">sum</span>(<span class="fu">qi_roles</span>(geographic_sample, <span class="fu">character</span>(<span class="dv">0</span>))<span class="sc">$</span>disclosure_role <span class="sc">==</span> <span class="st">&quot;quasi&quot;</span>)</span>
+<span id="cb5-60"><a href="#cb5-60" tabindex="-1"></a>  ),</span>
+<span id="cb5-61"><a href="#cb5-61" tabindex="-1"></a>  <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
+<span id="cb5-62"><a href="#cb5-62" tabindex="-1"></a>)</span></code></pre></div>
+<div id="individual_sample-200-x-7" class="section level3">
+<h3><code>individual_sample</code> (200 x 7)</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">kable</span>(individual_table, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">&quot;Option&quot;</span>, <span class="st">&quot;Feasible at k&quot;</span>, <span class="st">&quot;Cost&quot;</span>))</span></code></pre></div>
+<table>
+<colgroup>
+<col width="48%" />
+<col width="15%" />
+<col width="36%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Option</th>
+<th align="left">Feasible at k</th>
+<th align="left">Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Keep age + sex + education + smoker at k = 5</td>
+<td align="left">No</td>
+<td align="left">No k-anonymity protection applied</td>
+</tr>
+<tr class="even">
+<td align="left">Apply k = 3</td>
+<td align="left">Yes (k = 3)</td>
+<td align="left">12 suppressed QI cells</td>
+</tr>
+<tr class="odd">
+<td align="left">Generate 1000 rows at k = 5</td>
+<td align="left">Yes (k = 5)</td>
+<td align="left">11 suppressed QI cells</td>
+</tr>
+<tr class="even">
+<td align="left">Mark age as not part of the QI set</td>
+<td align="left">Yes (k = 5)</td>
+<td align="left">2 suppressed QI cells</td>
+</tr>
+</tbody>
+</table>
+<p>This is the person-level example where k-anonymity matters. The
+current four-column QI set is too sparse at <code>k = 5</code>, but the
+code above shows three concrete escape routes: lower <code>k</code> to
+3, generate 1000 rows, or remove <code>age</code> from the QI set.</p>
+</div>
+<div id="temporal_sample-365-x-5" class="section level3">
+<h3><code>temporal_sample</code> (365 x 5)</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">kable</span>(temporal_table, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">&quot;Option&quot;</span>, <span class="st">&quot;Feasible at k&quot;</span>, <span class="st">&quot;Cost&quot;</span>))</span></code></pre></div>
+<table>
+<colgroup>
+<col width="34%" />
+<col width="9%" />
+<col width="56%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Option</th>
+<th align="left">Feasible at k</th>
+<th align="left">Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Keep the combination question at none for all
+columns</td>
+<td align="left">Not applicable</td>
+<td align="left">No k-anonymity step; 0 QI columns selected because rows
+are site-day records, not people</td>
+</tr>
+</tbody>
+</table>
+<p>This sample is aggregate-shaped: each row is a site-day measurement,
+not a person. In that situation the combination question should usually
+stay at <code>none</code>, because there is no person-level
+quasi-identifier combination to protect with k-anonymity.</p>
+</div>
+<div id="geographic_sample-50-x-5" class="section level3">
+<h3><code>geographic_sample</code> (50 x 5)</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">kable</span>(geographic_table, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">&quot;Option&quot;</span>, <span class="st">&quot;Feasible at k&quot;</span>, <span class="st">&quot;Cost&quot;</span>))</span></code></pre></div>
+<table>
+<colgroup>
+<col width="34%" />
+<col width="9%" />
+<col width="56%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Option</th>
+<th align="left">Feasible at k</th>
+<th align="left">Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Keep the combination question at none for all
+columns</td>
+<td align="left">Not applicable</td>
+<td align="left">No k-anonymity step; 0 QI columns selected because rows
+are region summaries, not people</td>
+</tr>
+</tbody>
+</table>
+<p>This sample is also aggregate-shaped: each row summarizes a region.
+That is why the worked table above computes zero QI columns and treats
+k-anonymity as not applicable unless a user is actually modelling
+person-level records.</p>
+</div>
+</div>
+<div id="two-ways-to-use-it-with-ai" class="section level2">
+<h2>Two ways to use it with AI</h2>
+<div id="path-a-hand-off-the-synthetic-bundle" class="section level3">
+<h3>Path A: hand off the synthetic bundle</h3>
+<p>In the first workflow, the human uses the app, reviews the compare
+and privacy outputs, and exports the bundle. The AI gets the bundle’s
+<code>synthetic_data.csv</code> plus the <code>agent/</code> folder
+(<code>recipe.yaml</code>, <code>AGENT.md</code>,
+<code>manifest.json</code>) — but not the real data.</p>
+<p>This is the simplest trust story: the AI only sees synthetic
+artifacts that a human has reviewed.</p>
+</div>
+<div id="path-b-save-the-recipe-and-let-the-ai-reproduce" class="section level3">
+<h3>Path B: save the recipe and let the AI reproduce</h3>
+<p>In the second workflow, the human uses the app once. The exported
+bundle’s <code>agent/recipe.yaml</code> records everything needed to
+regenerate the synthetic data: the spec, the per-column roles, and the
+seed. An AI agent can then run DataGangeR itself, for example:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="ex">dataganger</span> synthesize <span class="op">&lt;</span>real-data<span class="op">&gt;</span> --recipe agent/recipe.yaml <span class="at">--out</span> check.zip</span></code></pre></div>
+<p>That path is paired with the packaged agent workflow guide.
+<code>dataganger skill</code> prints or copies the installed agent guide
+(shipped in the bundle as <code>agent/AGENT.md</code>), whose first rule
+is: the agent is not allowed to read the original data.</p>
+<p>The shipped agent workflow starts by reproducing the UI-generated
+synthetic CSV byte-for-byte before doing anything else. After that, the
+agent can vary approved settings and ask DataGangeR to synthesize again,
+but it still never opens the real data itself.</p>
+<p>In both paths, the AI is structurally kept on synthetic artifacts or
+a reproducible recipe. It does not inspect the real dataset.</p>
+</div>
+</div>
+<div id="the-no-network-guarantee" class="section level2">
+<h2>The no-network guarantee</h2>
+<p>The package’s no-network claim rests on two locks.</p>
+<div id="lock-1-no-network-code" class="section level3">
+<h3>Lock 1: no network code</h3>
+<p>The package contains no outbound network code in the data path. It
+does not use network primitives to send data out, and the Shiny app
+serves locally.</p>
+<p>This now includes the trust edges around the app itself:</p>
+<ul>
+<li>web fonts are self-hosted, so there is no CDN request</li>
+<li><code>report_issue()</code> prints a copyable GitHub issue URL and
+body instead of opening a browser</li>
+<li>the Shiny “Report a problem” button shows a copyable modal instead
+of launching anything</li>
+</ul>
+</div>
+<div id="lock-2-nothing-is-persisted" class="section level3">
+<h3>Lock 2: nothing is persisted</h3>
+<p>Real data is read into memory only. The app does not write the real
+dataset to disk, and nothing is retained after the app closes unless the
+user explicitly exports a synthetic bundle.</p>
+<p>Together, those locks answer the “what if the internet comes back
+later?” concern: there is no code to send data, and no retained real
+data to send later.</p>
+</div>
+<div id="how-it-is-proven" class="section level3">
+<h3>How it is proven</h3>
+<p>The guarantee is not just a claim in prose. The shipped branch
+includes several proofs:</p>
+<ol style="list-style-type: decimal">
+<li>a runtime trap test that errors if network primitives are called
+while the full pipeline and app UI are exercised</li>
+<li>a source-grep guard that fails if network-related symbols appear in
+package source</li>
+<li>an offline CI job that runs the test suite under
+<code>unshare -rn</code> on Linux</li>
+<li>open-source audit, so anyone can inspect the code and run the checks
+themselves</li>
+</ol>
+<p>That is stronger than “it works with the network turned off”.
+Disconnecting proves offline operation. These checks are meant to prove
+there is no hidden network path in the shipped source.</p>
+</div>
+<div id="verify-it-yourself-offline" class="section level3">
+<h3>Verify it yourself offline</h3>
+<p>If you want your own local proof, you can run the package offline
+yourself.</p>
+<ul>
+<li>Any OS: disconnect the machine from the network and run the
+workflow.</li>
+<li>Linux:
+<code>unshare -rn Rscript -e &#39;dataganger::run_app()&#39;</code></li>
+<li>Windows: disable the network adapter, use an outbound firewall block
+on <code>R.exe</code> / <code>Rscript.exe</code>, or run inside Windows
+Sandbox with networking disabled.</li>
+</ul>
+<p>Those are extra demonstrations. The main guarantee still comes from
+the source-level and test-level proofs above.</p>
+</div>
+</div>
+<div id="supply-chain-note" class="section level2">
+<h2>Supply-chain note</h2>
+<p>Open source is a trust advantage, but it is not magic. A malicious
+change or dependency compromise is still possible in theory.</p>
+<p>What the shipped no-network self-test changes is this: data theft
+cannot be silent. If someone adds a hidden way to send data out, it
+should break an automated test that anyone can run against the installed
+version.</p>
+<p>That is the honest limit and the honest promise. DataGangeR is built
+to reduce direct disclosure risk, not to offer a blanket privacy
+guarantee.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,636 @@
+/* ============================================================
+   DataGangeR — _alignment.css
+   ------------------------------------------------------------
+   Append-only visual patch to bring the Shiny app in line with
+   the latest design system. Load AFTER colors_and_type.css and
+   shiny-app.css. Heavy use of !important is intentional — these
+   rules need to beat Bootstrap and bslib defaults.
+
+   Sections:
+     1  bslib page chrome
+     2  Bootstrap form controls
+     3  Action buttons (.btn family)
+     4  Tabs (Compare screen)
+     5  <details> / <summary>
+     6  DT (DataTables) chrome
+     7  Shiny notifications
+     8  fileInput inside .upload zone
+     9  Misc — sliders, action links, focus
+   ============================================================ */
+
+
+/* ============ 1 · bslib page chrome ============ */
+
+html, body, .bslib-page-sidebar {
+  background: var(--bg) !important;
+}
+
+.bslib-sidebar-layout > .sidebar {
+  background: var(--paper-100) !important;
+  border-right: 1px solid var(--border) !important;
+  padding: 0 !important;
+}
+.bslib-sidebar-layout > .sidebar > .sidebar-content {
+  padding: 24px 20px !important;
+  background: transparent !important;
+}
+
+.bslib-sidebar-layout > .main {
+  padding: 32px 48px 120px !important;
+  max-width: 1100px;
+  background: var(--bg) !important;
+}
+
+.bslib-card,
+.card.bslib-card {
+  background: var(--paper-100) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--shadow-1) !important;
+}
+
+.tab-content.html-fill-item,
+.tab-pane.html-fill-item {
+  height: auto !important;
+}
+
+
+/* ============ 2 · Bootstrap form controls ============ */
+
+input[type="radio"],
+input[type="checkbox"],
+input[type="range"] {
+  accent-color: var(--synth-500);
+}
+
+.shiny-options-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.shiny-options-group .radio,
+.shiny-options-group .checkbox {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--ink-900);
+}
+.shiny-options-group .radio label,
+.shiny-options-group .checkbox label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 0;
+  font-weight: 400;
+}
+.shiny-options-group input[type="radio"],
+.shiny-options-group input[type="checkbox"] {
+  margin-top: 4px;
+}
+
+.form-control,
+.form-select,
+.selectize-input {
+  font-family: var(--font-sans) !important;
+  font-size: 14px !important;
+  background: var(--paper-50) !important;
+  border: 1px solid var(--paper-300) !important;
+  border-radius: 2px !important;
+  color: var(--ink-900) !important;
+  box-shadow: none !important;
+  padding: 8px 10px !important;
+}
+.form-control:focus,
+.form-select:focus,
+.selectize-input.focus {
+  border-color: var(--synth-500) !important;
+  box-shadow: 0 0 0 3px var(--synth-100) !important;
+  outline: 0 !important;
+}
+
+.control-label,
+.form-label,
+.shiny-input-container > label {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-700);
+  margin-bottom: 4px;
+}
+
+
+/* ============ 3 · Action buttons ============ */
+
+.btn.btn-primary,
+button.btn-primary,
+.shiny-download-link.btn {
+  background: var(--synth-500) !important;
+  border-color: var(--synth-500) !important;
+  color: white !important;
+  box-shadow: var(--shine);
+  border-radius: 4px !important;
+  padding: 8px 16px !important;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 14px;
+}
+.btn.btn-primary:hover,
+button.btn-primary:hover,
+.shiny-download-link.btn:hover {
+  background: var(--synth-700) !important;
+  border-color: var(--synth-700) !important;
+  color: white !important;
+}
+.btn.btn-primary:active,
+button.btn-primary:active {
+  transform: translateY(1px);
+  box-shadow: var(--shadow-1) !important;
+}
+
+.btn.btn-secondary,
+button.btn-secondary,
+.btn.btn-default,
+button.btn-default {
+  background: var(--paper-50) !important;
+  border-color: var(--paper-300) !important;
+  color: var(--ink-900) !important;
+  border-radius: 4px !important;
+  padding: 8px 16px !important;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: none !important;
+}
+.btn.btn-secondary:hover,
+button.btn-secondary:hover,
+.btn.btn-default:hover,
+button.btn-default:hover {
+  background: var(--paper-100) !important;
+  border-color: var(--paper-400) !important;
+}
+
+/* Semantic button colours (used in the fail-safe modal):
+   danger = red, success = green, warning = amber (recessive). */
+.btn.btn-danger,
+button.btn-danger {
+  background: var(--danger-500) !important;
+  border-color: var(--danger-500) !important;
+  color: white !important;
+  border-radius: 4px !important;
+  padding: 8px 16px !important;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 14px;
+}
+.btn.btn-danger:hover,
+button.btn-danger:hover {
+  background: #93281A !important;
+  border-color: #93281A !important;
+}
+
+.btn.btn-success,
+button.btn-success {
+  background: var(--success-500) !important;
+  border-color: var(--success-500) !important;
+  color: white !important;
+  border-radius: 4px !important;
+  padding: 8px 16px !important;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 14px;
+}
+.btn.btn-success:hover,
+button.btn-success:hover {
+  background: #25602F !important;
+  border-color: #25602F !important;
+}
+
+.btn.btn-warning,
+button.btn-warning {
+  background: var(--risk-500) !important;
+  border-color: var(--risk-500) !important;
+  color: white !important;
+  border-radius: 4px !important;
+  padding: 8px 16px !important;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 14px;
+}
+.btn.btn-warning:hover,
+button.btn-warning:hover {
+  background: var(--risk-700) !important;
+  border-color: var(--risk-700) !important;
+}
+
+.btn[disabled],
+.btn.disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
+
+/* "← Adjust settings" — action link, not button-shaped */
+.shiny-action-link,
+a.action-button {
+  font-family: var(--font-sans) !important;
+  font-size: 13px !important;
+  color: var(--fg-muted) !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+}
+.shiny-action-link:hover,
+a.action-button:hover {
+  color: var(--synth-700) !important;
+  text-decoration: underline !important;
+}
+
+
+/* ============ 4 · Tabs (Compare screen) ============ */
+
+.nav-tabs {
+  border-bottom: 1px solid var(--border) !important;
+  margin-bottom: 16px;
+  gap: 4px;
+}
+.nav-tabs .nav-link,
+.nav-tabs > li > a {
+  padding: 10px 16px !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 2px solid transparent !important;
+  color: var(--fg-muted) !important;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 0 !important;
+  margin-bottom: -1px !important;
+}
+.nav-tabs .nav-link.active,
+.nav-tabs > li.active > a {
+  color: var(--ink-900) !important;
+  border-bottom-color: var(--synth-500) !important;
+  background: transparent !important;
+}
+.nav-tabs .nav-link:hover,
+.nav-tabs > li > a:hover {
+  color: var(--ink-900) !important;
+}
+
+
+/* ============ 5 · <details> / <summary> ============ */
+
+details > summary {
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-900);
+  list-style: none;
+  border: 1px solid var(--paper-300);
+  border-radius: 999px;
+  background: var(--paper-50);
+}
+details > summary::-webkit-details-marker { display: none; }
+details > summary::before {
+  content: "+";
+  display: inline-block;
+  width: 12px;
+  text-align: center;
+  color: var(--fg-muted);
+  font-weight: 700;
+}
+details[open] > summary::before { content: "\2212"; }
+details > summary:hover {
+  border-color: var(--paper-400);
+  background: var(--paper-100);
+}
+
+.dg-disabled-select,
+.dg-disabled-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  background: var(--paper-100) !important;
+  color: var(--fg-muted) !important;
+}
+
+.role-info {
+  color: var(--fg-muted);
+  font-size: 12px;
+  cursor: help;
+}
+
+
+/* ============ 6 · DT chrome ============ */
+
+.dataTables_wrapper {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--ink-900);
+}
+.dataTables_wrapper .dataTables_filter input,
+.dataTables_wrapper .dataTables_length select {
+  font-family: var(--font-sans) !important;
+  border: 1px solid var(--paper-300) !important;
+  border-radius: 2px !important;
+  padding: 4px 8px !important;
+  background: var(--paper-50);
+  color: var(--ink-900);
+}
+.dataTables_wrapper .dataTables_filter input:focus,
+.dataTables_wrapper .dataTables_length select:focus {
+  border-color: var(--synth-500) !important;
+  box-shadow: 0 0 0 3px var(--synth-100) !important;
+  outline: 0 !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+  border-radius: 2px !important;
+  padding: 4px 10px !important;
+  font-family: var(--font-mono) !important;
+  font-size: 12px !important;
+  border: 1px solid var(--paper-300) !important;
+  margin: 0 2px !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+  background: var(--ink-900) !important;
+  color: white !important;
+  border-color: var(--ink-900) !important;
+}
+.dataTables_wrapper .dataTables_info {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-muted);
+}
+table.dataTable thead th {
+  border-bottom: 2px solid var(--ink-900) !important;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  font-weight: 500;
+}
+table.dataTable tbody td {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum";
+  border-bottom: 1px solid var(--paper-300) !important;
+  color: var(--ink-900);
+}
+table.dataTable tbody tr:hover {
+  background: var(--paper-100) !important;
+}
+
+
+/* ============ 7 · Shiny notifications ============ */
+
+.shiny-notification {
+  background: var(--ink-900) !important;
+  color: var(--paper-50) !important;
+  border: 0 !important;
+  border-radius: 6px !important;
+  box-shadow: var(--shadow-3) !important;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  padding: 12px 16px;
+}
+.shiny-notification.shiny-notification-warning {
+  background: var(--risk-500) !important;
+  color: white !important;
+}
+.shiny-notification.shiny-notification-error {
+  background: var(--danger-500) !important;
+  color: white !important;
+}
+.shiny-notification.shiny-notification-message {
+  background: var(--ink-900) !important;
+  color: var(--paper-50) !important;
+}
+.shiny-notification-close {
+  color: inherit !important;
+  opacity: 0.7;
+}
+
+
+/* ============ 8 · fileInput inside .upload zone ============ */
+
+/* Shiny's fileInputBinding binds all drag/drop handling to the closest
+   div.input-group (see shiny.js zoneOf()), which by default is only the
+   small Browse-button row. We stretch that div over the full .upload card
+   so the whole box — not just the button row — is a working drop target,
+   and hide its native chrome since the card's own icon/copy already
+   communicates the drop affordance. */
+
+.upload { position: relative; }
+
+.upload .shiny-input-container {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  width: 100% !important;
+  max-width: none !important;
+}
+.upload .shiny-input-container > label.control-label { display: none; }
+
+.upload .input-group {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  flex-wrap: nowrap;
+  opacity: 0;
+  cursor: pointer;
+}
+.upload .input-group .btn-file {
+  width: 100%;
+  height: 100%;
+}
+.upload .input-group .form-control { display: none; }
+
+.upload .progress {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 16px;
+  margin: 0;
+  pointer-events: none;
+}
+
+.upload:has(.input-group.shiny-file-input-over) {
+  border-color: var(--synth-500);
+  background: var(--synth-50);
+}
+
+
+/* ============ 9 · Misc — sliders, focus, etc. ============ */
+
+/* ionRangeSlider (used by shiny::sliderInput) */
+.irs--shiny .irs-bar {
+  background: var(--synth-500) !important;
+  border-color: var(--synth-500) !important;
+}
+.irs--shiny .irs-handle > i:first-child {
+  background: var(--synth-500) !important;
+}
+.irs--shiny .irs-from,
+.irs--shiny .irs-to,
+.irs--shiny .irs-single {
+  background: var(--synth-700) !important;
+  color: white !important;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.irs--shiny .irs-min,
+.irs--shiny .irs-max {
+  background: var(--paper-200) !important;
+  color: var(--fg-muted) !important;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+/* Universal focus ring fallback */
+*:focus-visible {
+  outline: 2px solid var(--synth-500);
+  outline-offset: 2px;
+}
+
+/* Bootstrap modal */
+.modal-content {
+  background: var(--paper-50) !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-3) !important;
+}
+.modal-header {
+  border-bottom: 1px solid var(--border) !important;
+}
+.modal-title {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  color: var(--ink-900);
+}
+
+/* ── Primary button — beat Bootstrap specificity ─────────────────── */
+.btn.btn-primary,
+.action-button.btn-primary,
+.shiny-download-link.btn-primary,
+a.btn-primary {
+  background: var(--synth-500) !important;
+  color: #fff !important;
+  border-color: var(--synth-500) !important;
+  box-shadow: var(--shine) !important;
+  font-weight: 600 !important;
+}
+.btn.btn-primary:hover,
+.action-button.btn-primary:hover {
+  background: var(--synth-700) !important;
+  border-color: var(--synth-700) !important;
+}
+
+/* ── Resize handle between main and data panel ───────────────────── */
+#resize-handle {
+  grid-column: unset;
+  z-index: 10;
+  background: var(--border);
+  transition: background 120ms;
+  user-select: none;
+}
+#resize-handle:hover { background: var(--synth-300); }
+
+/* ============ 10 · Console verbatim output ============ */
+.console pre.shiny-text-output {
+  background: transparent !important;
+  color: var(--paper-100) !important;
+  border: none !important;
+  box-shadow: none !important;
+  margin: 0;
+  padding: 0;
+  font-size: inherit;
+  font-family: inherit;
+  line-height: inherit;
+}
+
+/* ============ 11 · Column filter modal (drag-and-drop triage) ============ */
+
+.cf-modal-intro {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--fg-muted);
+  margin: 0 0 16px;
+}
+
+.cf-zones {
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.cf-zone {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1.5px dashed var(--paper-400);
+  border-radius: 8px;
+  background: var(--paper-50);
+  transition: border-color 120ms ease, background 120ms ease;
+}
+.cf-zone[data-bucket="pass_through"] { border-color: var(--info-500); }
+.cf-zone[data-bucket="drop"]         { border-color: var(--risk-500); }
+
+.cf-zone.cf-zone-over {
+  border-style: solid;
+  background: var(--synth-50);
+}
+.cf-zone[data-bucket="pass_through"].cf-zone-over { background: rgba(31, 111, 178, 0.08); }
+.cf-zone[data-bucket="drop"].cf-zone-over         { background: var(--risk-50); }
+
+.cf-zone-header {
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid var(--paper-200);
+}
+.cf-zone-title {
+  display: block;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink-900);
+}
+.cf-zone-hint {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--fg-subtle);
+  margin-top: 2px;
+}
+
+.cf-zone-chips {
+  flex: 1 1 auto;
+  min-height: 160px;
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 6px;
+}
+
+.cf-chip {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--paper-100);
+  border: 1px solid var(--paper-300);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-900);
+  cursor: grab;
+  user-select: none;
+  transition: opacity 120ms ease, box-shadow 120ms ease;
+}
+.cf-chip:hover { box-shadow: var(--shine); }
+.cf-chip:focus-visible { outline: 2px solid var(--synth-500); outline-offset: 2px; }
+.cf-chip.cf-dragging { opacity: 0.35; cursor: grabbing; }

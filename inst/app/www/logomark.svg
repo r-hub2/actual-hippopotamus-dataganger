@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96" role="img" aria-label="DataGangeR mark">
+  <defs>
+    
+    <filter id="smBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur in="SourceGraphic" stdDeviation="0.8"></feGaussianBlur></filter>
+    <filter id="midBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur in="SourceGraphic" stdDeviation="1.4"></feGaussianBlur></filter>
+    <filter id="bigBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur in="SourceGraphic" stdDeviation="2.2"></feGaussianBlur></filter>
+  </defs>
+
+  
+  <rect x="0" y="0" width="96" height="96" rx="14" fill="#11140F"></rect>
+  <rect x="0" y="0" width="96" height="22" rx="14" fill="white" opacity="0.05"></rect>
+
+  
+  <g opacity="0.85">
+    <rect x="56" y="34" width="22" height="3" rx="0.5" fill="#94B97A"></rect>
+    <rect x="56" y="41" width="16" height="3" rx="0.5" fill="#94B97A"></rect>
+    <rect x="56" y="48" width="20" height="3" rx="0.5" fill="#94B97A"></rect>
+    <rect x="56" y="55" width="14" height="3" rx="0.5" fill="#94B97A"></rect>
+    <rect x="56" y="62" width="18" height="3" rx="0.5" fill="#94B97A"></rect>
+  </g>
+
+  
+  <g font-family="Inter, Helvetica Neue, Arial, sans-serif" font-weight="700" font-size="74" letter-spacing="-3">
+    <text x="2" y="78" fill="#94B97A" opacity="0.12" filter="url(#bigBlur)">R</text>
+    <text x="7" y="76" fill="#94B97A" opacity="0.20" filter="url(#midBlur)">R</text>
+    <text x="12" y="74" fill="#94B97A" opacity="0.35" filter="url(#midBlur)">R</text>
+    <text x="17" y="72" fill="#94B97A" opacity="0.55" filter="url(#smBlur)">R</text>
+    <text x="22" y="70" fill="#E97FB8" opacity="0.50" filter="url(#smBlur)">R</text>
+    
+    <text x="26" y="68" fill="#E97FB8">R</text>
+  </g>
+</svg>

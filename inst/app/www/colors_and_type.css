@@ -1,0 +1,283 @@
+/* ============================================================
+   DataGangeR — Foundations
+   Color & Type tokens for the synthetic-data toolkit.
+   ============================================================ */
+
+/* ---- Web fonts: self-hosted (no external/CDN request; fully offline) ---- */
+@import url("fonts/fonts.css");
+
+:root {
+  /* =========================================================
+     COLOR — Ink & Paper base, with a "double" accent pair.
+     Real / Source = lichen green.  Synthetic / Double = magenta.
+     They appear together throughout the product to reinforce
+     the doppelgänger metaphor.
+     ========================================================= */
+
+  /* Paper / surface */
+  --paper-50:  #FBFAF6;   /* page background, warm off-white */
+  --paper-100: #F4F1E9;   /* card / panel surface            */
+  --paper-200: #E9E4D5;   /* subtle dividers, raised cards   */
+  --paper-300: #D7D0BB;   /* borders, table dividers         */
+  --paper-400: #B8B099;   /* disabled, footnote rule         */
+
+  /* Ink */
+  --ink-900: #11140F;     /* primary text, headlines         */
+  --ink-700: #2B2E27;     /* secondary text                  */
+  --ink-500: #5C5F55;     /* tertiary text, captions         */
+  --ink-300: #9A9C90;     /* muted, placeholder              */
+  --ink-100: #C8CABE;     /* faint rule on ink surfaces      */
+
+  /* Real / Source — lichen green (the original dataset) */
+  --real-50:  #ECF3E7;
+  --real-100: #D2E2C4;
+  --real-300: #94B97A;
+  --real-500: #4F7D32;
+  --real-700: #2E5118;
+  --real-900: #16280C;
+
+  /* Synth / Double — magenta (the doppelgänger) */
+  --synth-50:  #FCE9F3;
+  --synth-100: #F7C7E1;
+  --synth-300: #E97FB8;
+  --synth-500: #D43A8A;
+  --synth-700: #91205C;
+  --synth-900: #4B0F30;
+
+  /* Privacy / Risk — for warnings, disclosure flags */
+  --risk-50:  #FFF1E0;
+  --risk-300: #F2B36A;
+  --risk-500: #C76B12;
+  --risk-700: #7A3D02;
+
+  /* Status (info, success, danger) — used SPARINGLY */
+  --info-500:    #1F6FB2;
+  --success-500: #2F7A3B;
+  --danger-50:   #FBEAE7;
+  --danger-500:  #B7321F;
+  --danger-700:  #7A2415;
+
+  /* =========================================================
+     SEMANTIC — what most components should reference.
+     ========================================================= */
+  --bg:           var(--paper-50);
+  --bg-elevated: var(--paper-100);
+  --bg-sunken:   var(--paper-200);
+
+  --fg:           var(--ink-900);
+  --fg-muted:     var(--ink-500);
+  --fg-subtle:    var(--ink-300);
+  --fg-on-dark:   var(--paper-50);
+
+  --border:        var(--paper-300);
+  --border-strong: var(--paper-400);
+  --border-focus:  var(--synth-500);
+
+  --accent:         var(--synth-500);
+  --accent-hover:   var(--synth-700);
+  --accent-soft-bg: var(--synth-50);
+
+  --real:           var(--real-500);
+  --real-soft-bg:   var(--real-50);
+
+  /* =========================================================
+     TYPE FAMILIES
+     - serif:  Instrument Serif        (display, brand wordmark, big numbers)
+     - sans:   Inter                   (UI body, labels, tables)
+     - mono:   JetBrains Mono          (code, data, variable names, hashes)
+     ========================================================= */
+  --font-serif: "Instrument Serif", "GT Sectra", "Source Serif Pro", Georgia, serif;
+  --font-sans:  "Inter", "Helvetica Neue", system-ui, -apple-system, sans-serif;
+  --font-mono:  "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* =========================================================
+     TYPE SCALE — major-third, anchored at 16px base.
+     ========================================================= */
+  --fs-12: 0.75rem;    /* 12 — caption, table footnote   */
+  --fs-13: 0.8125rem;  /* 13 — label, breadcrumb         */
+  --fs-14: 0.875rem;   /* 14 — secondary body            */
+  --fs-15: 0.9375rem;  /* 15 — UI body                   */
+  --fs-16: 1rem;       /* 16 — body                      */
+  --fs-18: 1.125rem;   /* 18 — emphasis body             */
+  --fs-20: 1.25rem;    /* 20 — section eyebrow           */
+  --fs-22: 1.375rem;   /* 22 — h4                        */
+  --fs-28: 1.75rem;    /* 28 — h3                        */
+  --fs-36: 2.25rem;    /* 36 — h2 / panel title          */
+  --fs-48: 3rem;       /* 48 — h1 / page title           */
+  --fs-72: 4.5rem;     /* 72 — display, big numbers      */
+
+  /* Line height */
+  --lh-tight:    1.08;
+  --lh-snug:     1.22;
+  --lh-normal:   1.5;
+  --lh-relaxed:  1.65;
+
+  /* Tracking */
+  --tracking-tight: -0.02em;
+  --tracking-snug:  -0.01em;
+  --tracking-wide:  0.06em;
+  --tracking-uber:  0.14em;
+
+  /* =========================================================
+     SPACING (4px grid)
+     ========================================================= */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* =========================================================
+     RADIUS — restrained; we are a data tool, not a toy.
+     ========================================================= */
+  --radius-2: 2px;     /* inputs, chips    */
+  --radius-4: 4px;     /* buttons, cards   */
+  --radius-8: 8px;     /* large cards      */
+  --radius-pill: 999px;
+
+  /* =========================================================
+     SHADOW & ELEVATION — soft, paper-like.
+     The "shine" is reserved for brand-level moments
+     (logo lockup, primary CTA) and uses a thin specular highlight.
+     ========================================================= */
+  --shadow-1: 0 1px 0 0 rgba(17,20,15,0.04), 0 1px 2px 0 rgba(17,20,15,0.05);
+  --shadow-2: 0 1px 0 0 rgba(17,20,15,0.05), 0 4px 12px -2px rgba(17,20,15,0.08);
+  --shadow-3: 0 2px 0 0 rgba(17,20,15,0.06), 0 12px 32px -6px rgba(17,20,15,0.14);
+  --shadow-inset: inset 0 1px 0 0 rgba(255,255,255,0.6);
+  /* Brand "shine" — a thin top highlight + soft glow used on the
+     primary CTA and the wordmark. */
+  --shine: inset 0 1px 0 0 rgba(255,255,255,0.25),
+           inset 0 -1px 0 0 rgba(0,0,0,0.18),
+           0 1px 0 0 rgba(255,255,255,0.4),
+           0 8px 24px -8px rgba(212, 58, 138, 0.55);
+
+  /* Focus ring */
+  --ring: 0 0 0 3px var(--synth-100);
+}
+
+/* =========================================================
+   GLOBAL RESETS & BASE
+   ========================================================= */
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-15);
+  line-height: var(--lh-normal);
+  color: var(--fg);
+  background: var(--bg);
+  font-feature-settings: "ss01", "cv11", "tnum";
+}
+
+/* =========================================================
+   SEMANTIC TYPE — these are the recipes UIs should use.
+   ========================================================= */
+
+.t-display {
+  font-family: var(--font-serif);
+  font-size: var(--fs-72);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-tight);
+  font-weight: 400;
+}
+.t-h1 {
+  font-family: var(--font-sans);
+  font-size: var(--fs-36);
+  line-height: var(--lh-snug);
+  letter-spacing: -0.025em;
+  font-weight: 600;
+}
+.t-h2 {
+  font-family: var(--font-sans);
+  font-size: var(--fs-28);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--tracking-snug);
+  font-weight: 600;
+}
+.t-h3 {
+  font-family: var(--font-sans);
+  font-size: var(--fs-28);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--tracking-snug);
+  font-weight: 600;
+}
+.t-h4 {
+  font-family: var(--font-sans);
+  font-size: var(--fs-22);
+  line-height: var(--lh-snug);
+  font-weight: 600;
+}
+
+.t-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  letter-spacing: var(--tracking-uber);
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  font-weight: 500;
+}
+
+.t-label {
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  font-weight: 600;
+  letter-spacing: var(--tracking-snug);
+}
+
+.t-body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-15);
+  line-height: var(--lh-normal);
+}
+
+.t-body-sm {
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  line-height: var(--lh-normal);
+  color: var(--fg-muted);
+}
+
+.t-mono {
+  font-family: var(--font-mono);
+  font-size: var(--fs-13);
+  font-feature-settings: "tnum", "zero";
+}
+
+.t-num {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+}
+
+.t-caption {
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  color: var(--fg-subtle);
+  line-height: var(--lh-relaxed);
+}
+
+/* Brand wordmark — the "R" gets a magenta accent to wink at R + the gangster `R`.
+   The italic serif sets the slightly playful, slightly literary tone. */
+.brand-wordmark {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  color: var(--ink-900);
+  display: inline-flex;
+  align-items: baseline;
+}
+.brand-wordmark .gang {
+  font-style: italic;
+}
+.brand-wordmark .r {
+  color: var(--synth-500);
+  font-style: italic;
+}

@@ -1,0 +1,360 @@
+---
+title: "Privacy gating and Agent workflows"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Privacy gating and Agent workflows}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## The promise
+
+DataGangeR's spine is simple: you set the privacy rules once; then the AI only
+ever gets reviewed synthetic data or a reproducible recipe for generating it,
+and nothing leaves your machine.
+
+That supports two real workflows:
+
+- Path A: you hand the AI the synthetic bundle.
+- Path B: you save the config and let the AI call DataGangeR to reproduce or vary the synthetic data without ever reading the real data.
+
+Either way, the human makes the privacy decisions first.
+
+## The privacy gating ladder
+
+The app's privacy story is a ladder, not a single checkbox. Each step exists for a different reason.
+
+### 1. Entry attestation: direct identifiers
+
+Before anything else, the app opens with a hard attestation about direct identifiers. This is the first gate because names, emails, phone numbers, institutional IDs, record numbers, and similar columns are the obvious category that should not enter the workflow.
+
+If `synthpop` is not installed, this modal also recommends it for
+correlation-aware synthesis; the internal engine remains available as the
+dependency-free fallback.
+
+Why it exists: it makes the user explicitly confirm the basic rule up front, and it gives that rule downstream consequences.
+
+### 2. Upload
+
+Once the user attests, they upload the file.
+
+The upload flow immediately sorts columns into **Synthesise**, **Pass through**,
+or **Drop**. Identifier-shaped columns are flagged as direct identifiers and
+pre-suggested for scrambling/de-identification; the user can choose Drop or
+another allowed action before continuing.
+
+Why it exists: the package has to read the data into memory to profile it and
+look for risks. The honest claim is not "we don't read". The honest claim is:
+we scan locally to flag direct identifiers and help remove or de-identify them;
+we never upload; we never keep.
+
+### 3. Early soft fail-safe
+
+After upload triage, DataGangeR scans any retained columns for values that still
+look like direct identifiers and surfaces suspected matches with reasons. The
+user can confirm and proceed, drop the flagged columns, or abort.
+
+Why it exists: the attestation is informed consent, but the detector is an assistive safety net. It is there to catch problems early, before objective selection or column-by-column decisions.
+
+This is intentionally a soft checkpoint, not a claim that the package can catch everything. It reduces direct disclosure risk; it is not a guarantee.
+
+### 4. Objective
+
+Next, the user picks the objective: demo, development, or analytics.
+
+Why it exists: the objective sets the default disclosure posture and fidelity trade-offs before synthesis. It tells the package what kind of sharing job the synthetic data needs to support.
+
+### 5. Configure: two questions per column
+
+After the no-direct-identifiers attestation, Configure asks two questions for
+every eligible column. The lead-in focuses on the two remaining risks, while Q1
+still offers a direct-identifier answer so the user can correct the attestation
+or an earlier detector:
+
+> You've confirmed there are no direct identifiers. Two risks remain for each column:
+>
+> - Q1: Could this column, combined with others, help single out a person?
+> - Q2: Is this column sensitive — would it be harmful if revealed?
+
+Why it exists: this is where the human defines the actual privacy rules, column by column, and the app hard-gates progress until every column is answered.
+
+Q1 maps to quasi-identifiers: whether a column contributes to singling someone out in combination with other columns. Q2 maps to sensitive attributes: whether the column would be harmful if revealed even if it is not identifying by itself.
+
+### 6. Synthesis enforcement
+
+Once the roles are set, DataGangeR enforces them during synthesis:
+quasi-identifying columns (Q1 = combination) are coarsened and grouped with
+k-anonymity so no rare combination survives; sensitive columns that are not
+quasi-identifying are recreated from their distributions — exact values are not
+copied, but attribute-level protection is not yet applied; and a direct answer
+derives a Drop action. A deliberate per-column Scramble or Pass through override
+is preserved, with Pass through visibly warning that it copies real values.
+
+Why it exists: the answers are not just labels for documentation. They become executable rules that shape the synthetic output.
+
+### 7. Compare plus privacy report
+
+After generation, the app splits fidelity checks into **Univariate** and
+**Bivariate** views, alongside a privacy report. Univariate checks compare each
+column's distribution. Bivariate checks test whether a predictor-to-outcome
+relationship changes between original and synthetic data by fitting an
+X-by-synthetic interaction. Low interaction p-values indicate poorer fidelity;
+effect sizes are odds ratios for binary outcomes, slope ratios for counts, and
+differences in slope for continuous outcomes (with a joint test for multi-level
+categorical outcomes). The exported comparison report repeats these interaction
+tests for eligible unordered pairs in data-column order.
+
+Why it exists: the package should not ask the user to trust the synthetic output blindly. The compare step shows how closely both distributions and relationships track the original, and the privacy report shows the disclosure controls and warnings that matter for sharing.
+
+### 8. Export
+
+Finally, the user reviews a plain-language disclosure-risk brief and exports a
+single bundle containing the synthetic data, human-readable report, and agent
+recipe.
+
+The brief reports the minimum group size, blanked rows, exact reproductions of
+real records, sensitive exact matches, and remaining privacy findings. A
+sensitive exact match blocks the first export attempt. After regeneration, a
+human can acknowledge a residual match; the decision is recorded in the
+manifest. The page puts the bundle contents first and does not repeat the
+Generation summary. When k-anonymity was infeasible, its acknowledgment uses
+the actual k, QI column names, and smallest group size to explain which guarantee
+is missing before the user can proceed.
+
+Why it exists: export is where the two AI workflows split. You can hand off
+reviewed synthetic artifacts directly, or use the recipe that lets an agent
+reproduce the same synthetic data later without touching the real data.
+
+## What the two questions reinforce
+
+The two Configure questions matter because removing names is not the whole job.
+
+- Q1 reinforces linkage risk: a column can be safe on its own but risky in combination with others.
+- Q2 reinforces that harm is not the same thing as identification: a column can be non-identifying and still be sensitive.
+
+Mapped to the three disclosure-control categories, the ladder works like this:
+
+- Entry attestation plus the early fail-safe: direct identifiers.
+- Q1: quasi-identifiers.
+- Q2: sensitive attributes.
+
+That is the point of the sequence. After the user confirms there are no direct identifiers, the app keeps the two subtler risks visible so the user does not falsely feel "done" after removing names.
+
+## Short glossary
+
+- **Quasi-identifier (QI):** a column that does not name a person on its own, but can identify someone when combined with others, like age + sex + education.
+- **k-anonymity:** a rule that requires every quasi-identifier combination to appear in at least `k` rows.
+- **k:** the minimum number of rows required for each quasi-identifier combination.
+- **Cell:** one group of rows that shares the same quasi-identifier combination.
+- **Suppression:** blanking the quasi-identifier values in rows that still fall below `k`.
+
+## Worked k-anonymity examples from the built-in samples
+
+```{r kanon-worked-examples}
+library(dataganger)
+library(knitr)
+
+# Everything below uses only exported DataGangeR functions, so you can run it
+# yourself. A "roles" frame just needs `variable` and `disclosure_role`
+# ("quasi" marks a quasi-identifier, "direct" maps to Drop unless an explicit
+# action override is supplied, and "none" is left alone).
+qi_roles <- function(data, qi_cols, drop_cols = "id") {
+  data.frame(
+    variable = names(data),
+    disclosure_role = ifelse(
+      names(data) %in% qi_cols, "quasi",
+      ifelse(names(data) %in% drop_cols, "direct", "none")
+    ),
+    stringsAsFactors = FALSE
+  )
+}
+
+# Probe one configuration: returns the kanon outcome (infeasible? how many
+# quasi-identifier cells had to be suppressed?) without printing warnings.
+probe_kanon <- function(data, qi_cols, k) {
+  out <- withCallingHandlers(
+    enforce_kanon(data, qi_roles(data, qi_cols), k = k),
+    warning = function(w) invokeRestart("muffleWarning")
+  )
+  attr(out, "kanon", exact = TRUE)
+}
+
+individual_qi <- c("age", "sex", "education", "smoker")
+
+# Escape route 1: walk k down from 5 to the largest value that works
+# (never below 3 - smaller values give close to no protection).
+feasible_k <- NULL
+for (k_try in 5:3) {
+  info <- probe_kanon(individual_sample, individual_qi, k_try)
+  if (!isTRUE(info$infeasible)) {
+    feasible_k <- k_try
+    feasible_k_info <- info
+    break
+  }
+}
+
+# Escape route 2: generate more synthetic rows, so each quasi-identifier
+# combination is shared by more rows. The engine is pinned so the numbers
+# do not depend on which synthesis packages are installed.
+more_rows_spec <- synth_spec(
+  purpose = "development", n = 1000, seed = 1, engine = "internal"
+)
+more_rows <- withCallingHandlers(
+  synthesize_data(individual_sample, more_rows_spec,
+                  roles = qi_roles(individual_sample, individual_qi)),
+  warning = function(w) invokeRestart("muffleWarning")
+)
+more_rows_info <- attr(more_rows, "kanon", exact = TRUE)
+
+# Escape route 3: shrink the quasi-identifier set (age drives the sparsity:
+# it has the most distinct values of the four).
+drop_age_info <- probe_kanon(
+  individual_sample, c("sex", "education", "smoker"), 5
+)
+
+suppressed_text <- function(info) {
+  n <- info$suppressed_cells
+  sprintf("%d suppressed QI cells", if (is.null(n)) 0L else n)
+}
+
+individual_table <- data.frame(
+  option = c(
+    "Keep age + sex + education + smoker at k = 5",
+    sprintf("Apply k = %d", feasible_k),
+    "Generate 1000 rows at k = 5",
+    "Mark age as not part of the QI set"
+  ),
+  feasible_at_k = c(
+    "No",
+    sprintf("Yes (k = %d)", feasible_k),
+    if (isTRUE(more_rows_info$infeasible)) "No" else "Yes (k = 5)",
+    if (isTRUE(drop_age_info$infeasible)) "No" else "Yes (k = 5)"
+  ),
+  cost = c(
+    "No k-anonymity protection applied",
+    suppressed_text(feasible_k_info),
+    suppressed_text(more_rows_info),
+    suppressed_text(drop_age_info)
+  ),
+  stringsAsFactors = FALSE
+)
+
+# The temporal and geographic samples are aggregate-shaped (site-day records
+# and region summaries, not people), so no column is marked as identifying
+# in combination and the k-anonymity step never engages.
+temporal_table <- data.frame(
+  option = "Keep the combination question at none for all columns",
+  feasible_at_k = "Not applicable",
+  cost = sprintf(
+    "No k-anonymity step; %d QI columns selected because rows are site-day records, not people",
+    sum(qi_roles(temporal_sample, character(0))$disclosure_role == "quasi")
+  ),
+  stringsAsFactors = FALSE
+)
+
+geographic_table <- data.frame(
+  option = "Keep the combination question at none for all columns",
+  feasible_at_k = "Not applicable",
+  cost = sprintf(
+    "No k-anonymity step; %d QI columns selected because rows are region summaries, not people",
+    sum(qi_roles(geographic_sample, character(0))$disclosure_role == "quasi")
+  ),
+  stringsAsFactors = FALSE
+)
+```
+
+### `individual_sample` (200 x 7)
+
+```{r}
+kable(individual_table, col.names = c("Option", "Feasible at k", "Cost"))
+```
+
+This is the person-level example where k-anonymity matters. The current four-column QI set is too sparse at `k = 5`, but the code above shows three concrete escape routes: lower `k` to 3, generate 1000 rows, or remove `age` from the QI set.
+
+### `temporal_sample` (365 x 5)
+
+```{r}
+kable(temporal_table, col.names = c("Option", "Feasible at k", "Cost"))
+```
+
+This sample is aggregate-shaped: each row is a site-day measurement, not a person. In that situation the combination question should usually stay at `none`, because there is no person-level quasi-identifier combination to protect with k-anonymity.
+
+### `geographic_sample` (50 x 5)
+
+```{r}
+kable(geographic_table, col.names = c("Option", "Feasible at k", "Cost"))
+```
+
+This sample is also aggregate-shaped: each row summarizes a region. That is why the worked table above computes zero QI columns and treats k-anonymity as not applicable unless a user is actually modelling person-level records.
+
+## Two ways to use it with AI
+
+### Path A: hand off the synthetic bundle
+
+In the first workflow, the human uses the app, reviews the compare and privacy outputs, and exports the bundle. The AI gets the bundle's `synthetic_data.csv` plus the `agent/` folder (`recipe.yaml`, `AGENT.md`, `manifest.json`) — but not the real data.
+
+This is the simplest trust story: the AI only sees synthetic artifacts that a
+human has reviewed.
+
+### Path B: save the recipe and let the AI reproduce
+
+In the second workflow, the human uses the app once. The exported bundle's `agent/recipe.yaml` records everything needed to regenerate the synthetic data: the spec, the per-column roles, and the seed. An AI agent can then run DataGangeR itself, for example:
+
+```sh
+dataganger synthesize <real-data> --recipe agent/recipe.yaml --out check.zip
+```
+
+That path is paired with the packaged agent workflow guide. `dataganger skill` prints or copies the installed agent guide (shipped in the bundle as `agent/AGENT.md`), whose first rule is: the agent is not allowed to read the original data.
+
+The shipped agent workflow starts by reproducing the UI-generated synthetic CSV byte-for-byte before doing anything else. After that, the agent can vary approved settings and ask DataGangeR to synthesize again, but it still never opens the real data itself.
+
+In both paths, the AI is structurally kept on synthetic artifacts or a reproducible recipe. It does not inspect the real dataset.
+
+## The no-network guarantee
+
+The package's no-network claim rests on two locks.
+
+### Lock 1: no network code
+
+The package contains no outbound network code in the data path. It does not use network primitives to send data out, and the Shiny app serves locally.
+
+This now includes the trust edges around the app itself:
+
+- web fonts are self-hosted, so there is no CDN request
+- `report_issue()` prints a copyable GitHub issue URL and body instead of opening a browser
+- the Shiny "Report a problem" button shows a copyable modal instead of launching anything
+
+### Lock 2: nothing is persisted
+
+Real data is read into memory only. The app does not write the real dataset to disk, and nothing is retained after the app closes unless the user explicitly exports a synthetic bundle.
+
+Together, those locks answer the "what if the internet comes back later?" concern: there is no code to send data, and no retained real data to send later.
+
+### How it is proven
+
+The guarantee is not just a claim in prose. The shipped branch includes several proofs:
+
+1. a runtime trap test that errors if network primitives are called while the full pipeline and app UI are exercised
+2. a source-grep guard that fails if network-related symbols appear in package source
+3. an offline CI job that runs the test suite under `unshare -rn` on Linux
+4. open-source audit, so anyone can inspect the code and run the checks themselves
+
+That is stronger than "it works with the network turned off". Disconnecting proves offline operation. These checks are meant to prove there is no hidden network path in the shipped source.
+
+### Verify it yourself offline
+
+If you want your own local proof, you can run the package offline yourself.
+
+- Any OS: disconnect the machine from the network and run the workflow.
+- Linux: `unshare -rn Rscript -e 'dataganger::run_app()'`
+- Windows: disable the network adapter, use an outbound firewall block on `R.exe` / `Rscript.exe`, or run inside Windows Sandbox with networking disabled.
+
+Those are extra demonstrations. The main guarantee still comes from the source-level and test-level proofs above.
+
+## Supply-chain note
+
+Open source is a trust advantage, but it is not magic. A malicious change or dependency compromise is still possible in theory.
+
+What the shipped no-network self-test changes is this: data theft cannot be silent. If someone adds a hidden way to send data out, it should break an automated test that anyone can run against the installed version.
+
+That is the honest limit and the honest promise. DataGangeR is built to reduce direct disclosure risk, not to offer a blanket privacy guarantee.

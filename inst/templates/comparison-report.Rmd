@@ -1,0 +1,113 @@
+---
+title: "DataGangeR Comparison Report"
+output: html_document
+params:
+  comparison: !r NULL
+  privacy: !r NULL
+  synthetic_summary: !r NULL
+  purpose: !r NULL
+  generated_at: !r NULL
+---
+
+```{r setup, include=FALSE}
+comparison <- params$comparison
+privacy <- params$privacy
+summary_info <- params$synthetic_summary
+```
+
+# Bundle Summary
+
+- Purpose: `r params$purpose`
+- Generated at: `r params$generated_at`
+- Synthetic rows: `r summary_info$n_rows`
+- Synthetic columns: `r summary_info$n_cols`
+
+## Synthetic Column Classes
+
+```{r synthetic-classes, echo=FALSE}
+class_tbl <- data.frame(
+  variable = names(summary_info$classes),
+  class = unname(summary_info$classes),
+  stringsAsFactors = FALSE
+)
+knitr::kable(class_tbl)
+```
+
+## Dataset Metrics
+
+```{r dataset-metrics, echo=FALSE}
+if (is.null(comparison)) {
+  cat("No comparison object was supplied.\n")
+} else {
+  knitr::kable(comparison$dataset)
+}
+```
+
+## Numeric Comparison
+
+```{r numeric-metrics, echo=FALSE}
+if (is.null(comparison) || nrow(comparison$numeric) == 0) {
+  cat("No numeric comparison rows available.\n")
+} else {
+  knitr::kable(comparison$numeric)
+}
+```
+
+## Categorical Comparison
+
+```{r categorical-metrics, echo=FALSE}
+if (is.null(comparison) || nrow(comparison$categorical) == 0) {
+  cat("No categorical comparison rows available.\n")
+} else {
+  knitr::kable(comparison$categorical)
+}
+```
+
+## Relationship Comparison
+
+```{r relationship-metrics, echo=FALSE}
+relationship_rows <- if (is.null(comparison)) NULL else comparison$relationship
+if (is.null(relationship_rows) || !is.data.frame(relationship_rows) || nrow(relationship_rows) == 0) {
+  cat("No relationship comparison rows available.\n")
+} else {
+  knitr::kable(relationship_rows)
+}
+```
+
+### Relationship-Interaction Tests
+
+For each unordered pair in data-column order, the first column is predictor X
+and the second is outcome Y. The interaction tests whether the X-to-Y
+relationship changed in synthetic data; a low interaction p-value indicates a
+modified relationship and poorer fidelity.
+
+```{r interaction-metrics, echo=FALSE}
+interaction_rows <- if (is.null(comparison)) NULL else comparison$interaction
+no_interactions <- is.null(interaction_rows) ||
+  !is.data.frame(interaction_rows) || nrow(interaction_rows) == 0 ||
+  (all(is.na(interaction_rows$estimate)) && all(is.na(interaction_rows$p_value)))
+if (no_interactions) {
+  cat("No estimable relationship interactions.\n")
+} else {
+  display_rows <- interaction_rows
+  display_rows$estimate <- ifelse(
+    is.na(display_rows$estimate), "",
+    format(signif(display_rows$estimate, 4), trim = TRUE, scientific = FALSE)
+  )
+  display_rows$p_value <- ifelse(
+    is.na(display_rows$p_value), "",
+    format(signif(display_rows$p_value, 3), trim = TRUE)
+  )
+  knitr::kable(display_rows)
+}
+```
+
+## Privacy Flags
+
+```{r privacy-flags, echo=FALSE}
+if (is.null(privacy) || nrow(privacy) == 0) {
+  cat("No privacy flags were supplied for this bundle.\n")
+} else {
+  knitr::kable(privacy)
+}
+```
